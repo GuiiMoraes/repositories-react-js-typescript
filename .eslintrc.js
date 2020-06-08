@@ -20,7 +20,7 @@ module.exports = {
   rules: {
     "react-hooks/rules-of-hooks": "error",
     "react-hooks/exhaustive-deps": "warn",
-    "react/jsx-filename-extensions": ["error", { extensions: [".tsx"] }],
+    "react/jsx-filename-extension": ["error", { extensions: [".tsx"] }],
     "import/prefer-default-export": "off",
     "import/extensions": [
       "error",
