@@ -5,7 +5,7 @@ import GitHubApi from '../../services/api';
 
 import logoImg from '../../assets/logo.svg';
 
-import { Title, Form, Repositories } from './styles';
+import { Title, Form, ErrorMessage, Repositories } from './styles';
 
 interface Repository {
   full_name: string;
@@ -18,6 +18,7 @@ interface Repository {
 
 const Dashboard: React.FC = () => {
   const [typedRepo, setTypedRepo] = useState('');
+  const [inputError, setInputError] = useState('');
   const [repositories, setRepositories] = useState<Repository[]>([]);
 
   function handleChangeInput(event: ChangeEvent<HTMLInputElement>) {
@@ -28,12 +29,22 @@ const Dashboard: React.FC = () => {
     event: FormEvent<HTMLFormElement>
   ): Promise<void> {
     event.preventDefault();
-    const response = await GitHubApi.get(`repos/${typedRepo}`);
 
-    const newRepository = response.data;
+    if (!typedRepo) {
+      return setInputError("O campo 'nome do repositório' não pode ser vazio");
+    }
 
-    setRepositories([...repositories, newRepository]);
-    setTypedRepo('');
+    try {
+      const response = await GitHubApi.get(`repos/${typedRepo}`);
+
+      const newRepository = response.data;
+
+      setTypedRepo('');
+      setInputError('');
+      return setRepositories([...repositories, newRepository]);
+    } catch {
+      return setInputError('Erro ao buscar esse repositório, tente novamente');
+    }
   }
 
   return (
@@ -41,7 +52,7 @@ const Dashboard: React.FC = () => {
       <img src={logoImg} alt="github explorer" />
       <Title>Explore repositórios no GitHub</Title>
 
-      <Form onSubmit={handleAddRepository}>
+      <Form hasError={Boolean(inputError)} onSubmit={handleAddRepository}>
         <input
           placeholder="Digite o nome do repositório"
           onChange={handleChangeInput}
@@ -49,6 +60,8 @@ const Dashboard: React.FC = () => {
         />
         <button type="submit">Pesquisar</button>
       </Form>
+
+      {inputError && <ErrorMessage>{inputError}</ErrorMessage>}
 
       <Repositories>
         {repositories.map(repository => (
